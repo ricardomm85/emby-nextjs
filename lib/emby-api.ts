@@ -25,32 +25,47 @@ export async function authenticate(
   username: string,
   password: string
 ): Promise<{ token: string; userId: string; userName: string }> {
-  const url = `${host}/emby/Users/AuthenticateByName`;
+  console.log("[EMBY AUTH] Intentando conectar a:", host);
+  console.log("[EMBY AUTH] Usuario:", username);
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Emby-Authorization": getAuthHeader(),
-    },
-    body: JSON.stringify({
-      Username: username,
-      Pw: password,
-      Password: password,
-    }),
-  });
+  try {
+    // Usar proxy API para evitar problemas de CORS y mixed content (HTTP/HTTPS)
+    const response = await fetch("/api/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        host,
+        username,
+        password,
+        deviceId: getDeviceId(),
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error("Credenciales inválidas");
+    console.log("[EMBY AUTH] Proxy response status:", response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("[EMBY AUTH] Error response:", errorData);
+      throw new Error(errorData.error || `Error ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("[EMBY AUTH] Login exitoso para:", data.userName);
+
+    return {
+      token: data.token,
+      userId: data.userId,
+      userName: data.userName,
+    };
+  } catch (error) {
+    console.error("[EMBY AUTH] Error en authenticate:", error);
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error("No se pudo conectar al servidor de autenticación");
+    }
+    throw error;
   }
-
-  const data: AuthResponse = await response.json();
-
-  return {
-    token: data.AccessToken,
-    userId: data.User.Id,
-    userName: data.User.Name,
-  };
 }
 
 export async function searchItems(
