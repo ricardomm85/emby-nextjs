@@ -16,7 +16,7 @@ type FilterType = "Movie,Series" | "Movie" | "Series";
 
 export default function SearchPage() {
   const router = useRouter();
-  const { credentials, isLoading: authLoading, logout } = useAuth();
+  const { credentials, isLoading: authLoading } = useAuth();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterType>("Movie,Series");
   const [results, setResults] = useState<MediaItem[]>([]);
@@ -57,11 +57,6 @@ export default function SearchPage() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    router.replace("/login");
-  };
-
   if (authLoading || !credentials) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,14 +67,8 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold">Emby Downloader</h1>
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              Cerrar sesión
-            </Button>
-          </div>
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <div className="space-y-4">
           <div className="flex gap-2">
             <Input
               type="search"
@@ -96,7 +85,6 @@ export default function SearchPage() {
           <Tabs
             value={filter}
             onValueChange={(v) => setFilter(v as FilterType)}
-            className="mt-4"
           >
             <TabsList>
               <TabsTrigger value="Movie,Series">Todo</TabsTrigger>
@@ -105,9 +93,8 @@ export default function SearchPage() {
             </TabsList>
           </Tabs>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6">
+        <main>
         {isSearching ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -133,7 +120,8 @@ export default function SearchPage() {
             Escribe un término de búsqueda para comenzar
           </div>
         )}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
