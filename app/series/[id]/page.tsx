@@ -87,7 +87,7 @@ export default function SeriesPage({
     const seriesName = series.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
     const filename = `${seriesName}_S${String(episode.ParentIndexNumber).padStart(2, "0")}E${String(episode.IndexNumber).padStart(2, "0")}.${episode.Container || "mkv"}`;
 
-    const proxyUrl = `/api/download?url=${encodeURIComponent(embyUrl)}&filename=${encodeURIComponent(filename)}`;
+    const proxyUrl = `/api/download?url=${encodeURIComponent(embyUrl)}&filename=${encodeURIComponent(filename)}&host=${encodeURIComponent(credentials.host)}`;
 
     window.open(proxyUrl, "_blank");
     toast.success(`Descargando: S${episode.ParentIndexNumber}E${episode.IndexNumber}`);
