@@ -1,26 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateEmbyHost, sanitizeDeviceId } from "@/lib/security";
-import { rateLimit, getRequestIdentifier } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
-  // Rate limiting: 1 intento de login por minuto por IP
-  const identifier = getRequestIdentifier(request);
-  const { allowed, remaining, resetTime } = rateLimit(identifier, 1, 60000);
-
-  if (!allowed) {
-    return NextResponse.json(
-      { error: "Demasiados intentos. Intenta de nuevo más tarde." },
-      {
-        status: 429,
-        headers: {
-          "X-RateLimit-Limit": "1",
-          "X-RateLimit-Remaining": String(remaining),
-          "X-RateLimit-Reset": String(Math.floor(resetTime / 1000)),
-        },
-      }
-    );
-  }
-
+  // Nota: Rate limiting se maneja en middleware.ts
   try {
     const { host, username, password, deviceId } = await request.json();
 

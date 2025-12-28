@@ -16,11 +16,10 @@ This document outlines the security measures implemented in this application.
   - Private IP ranges (10.x.x.x, 192.168.x.x, 172.16-31.x.x)
   - Localhost and link-local addresses
   - Non-HTTP/HTTPS protocols
-- **`/api/download`**: Validates download URLs match the authorized Emby server
-  - Compares hostname and port with authenticated server
-  - Prevents downloading from arbitrary URLs
 
-**Implementation:** `lib/security.ts` - `validateEmbyHost()` and `validateDownloadUrl()`
+**Implementation:** `lib/security.ts` - `validateEmbyHost()`
+
+**Note:** Download proxy was removed entirely. Downloads now happen directly from browser to Emby server (see Bandwidth Protection below).
 
 ### 2. Header Injection Prevention
 
@@ -43,12 +42,18 @@ This document outlines the security measures implemented in this application.
 
 **Solution:**
 - **Login endpoint** (`/api/auth`): 1 attempt per minute per IP
-- **Download endpoint** (`/api/download`): 5 downloads per minute per IP
 - Returns HTTP 429 with retry-after headers
-- In-memory implementation (suitable for single instance)
-  - For production with multiple instances, use distributed storage (Redis, Vercel KV)
+- Implemented via middleware for better consistency
 
-**Implementation:** `lib/rate-limit.ts`
+**Implementation:**
+- `lib/rate-limit.ts` - Rate limiting logic
+- `middleware.ts` - Applied at edge before API routes
+
+**Limitations:**
+- In-memory implementation only protects within a single serverless instance
+- Vercel serverless functions are stateless and ephemeral
+- For distributed rate limiting, use Vercel KV, Upstash Redis, or similar
+- Current implementation provides basic protection but can be bypassed with distributed attacks
 
 ### 4. Timeout Protection
 
@@ -94,6 +99,45 @@ Comprehensive security headers implemented in `next.config.ts`:
 **Notes:**
 - `unsafe-inline` and `unsafe-eval` are necessary for Next.js functionality. In a future version, consider using nonces for stricter CSP.
 - `upgrade-insecure-requests` is NOT used because the app needs to connect to HTTP Emby servers (typically on local networks without SSL).
+
+## Bandwidth Protection (Vercel Free Tier)
+
+### The Problem
+
+Vercel Free tier includes:
+- 100 GB bandwidth per month
+- Serverless function execution time limits
+- Function payload size limits
+
+A previous implementation used `/api/download` as a proxy for downloads, which would:
+- Stream entire video files (2-50 GB each) through Vercel
+- Consume massive bandwidth
+- Be vulnerable to quota exhaustion attacks
+- Not work reliably due to serverless limits
+
+### The Solution
+
+**Downloads now happen DIRECTLY from browser to Emby server:**
+
+1. **Zero Vercel bandwidth usage** for downloads
+2. **No proxy overhead** - faster downloads
+3. **No attack surface** for quota exhaustion
+4. **Simpler architecture** - fewer points of failure
+
+**Trade-off:**
+- Browser may show "mixed content" warnings (HTTPS site downloading from HTTP Emby)
+- Downloads still work, users just need to allow it
+
+**Code Changes:**
+- Removed `/app/api/download/route.ts` entirely
+- Updated `app/movie/[id]/page.tsx` to download directly
+- Updated `app/series/[id]/page.tsx` to download directly
+
+This architectural decision prioritizes:
+- ✅ Protection of free tier quota
+- ✅ Reliability and performance
+- ✅ Simpler security model
+- ⚠️ Slight UX degradation (mixed content warnings)
 
 ## Security Best Practices
 

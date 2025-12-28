@@ -54,12 +54,10 @@ export default function MoviePage({
   const handleDownload = () => {
     if (!credentials || !movie) return;
 
-    const embyUrl = getDownloadUrl(credentials.host, movie.Id, credentials.token);
-    const filename = `${movie.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_")}.${movie.Container || "mkv"}`;
+    const downloadUrl = getDownloadUrl(credentials.host, movie.Id, credentials.token);
 
-    const proxyUrl = `/api/download?url=${encodeURIComponent(embyUrl)}&filename=${encodeURIComponent(filename)}&host=${encodeURIComponent(credentials.host)}`;
-
-    window.open(proxyUrl, "_blank");
+    // Descargar directamente del servidor Emby (sin proxy)
+    window.open(downloadUrl, "_blank");
     toast.success("Descarga iniciada");
   };
 

@@ -83,13 +83,10 @@ export default function SeriesPage({
   const downloadEpisode = (episode: Episode) => {
     if (!credentials || !series) return;
 
-    const embyUrl = getDownloadUrl(credentials.host, episode.Id, credentials.token);
-    const seriesName = series.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_");
-    const filename = `${seriesName}_S${String(episode.ParentIndexNumber).padStart(2, "0")}E${String(episode.IndexNumber).padStart(2, "0")}.${episode.Container || "mkv"}`;
+    const downloadUrl = getDownloadUrl(credentials.host, episode.Id, credentials.token);
 
-    const proxyUrl = `/api/download?url=${encodeURIComponent(embyUrl)}&filename=${encodeURIComponent(filename)}&host=${encodeURIComponent(credentials.host)}`;
-
-    window.open(proxyUrl, "_blank");
+    // Descargar directamente del servidor Emby (sin proxy)
+    window.open(downloadUrl, "_blank");
     toast.success(`Descargando: S${episode.ParentIndexNumber}E${episode.IndexNumber}`);
   };
 
