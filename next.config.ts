@@ -29,13 +29,7 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
               // Form actions: solo al mismo origen
               "form-action 'self'",
-              // Upgrade insecure requests en producción
-              ...(process.env.NODE_ENV === "production"
-                ? ["upgrade-insecure-requests"]
-                : []),
-            ]
-              .filter(Boolean)
-              .join("; "),
+            ].join("; "),
           },
           {
             key: "X-Frame-Options",

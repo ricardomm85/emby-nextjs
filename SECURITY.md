@@ -85,14 +85,15 @@ Comprehensive security headers implemented in `next.config.ts`:
   - `object-src 'none'` - No plugins/objects
   - `base-uri 'self'` - Prevent base tag injection
   - `form-action 'self'` - Forms only submit to same origin
-  - `upgrade-insecure-requests` - Force HTTPS in production
 
 - **X-Frame-Options: DENY** - Prevent clickjacking
 - **X-Content-Type-Options: nosniff** - Prevent MIME sniffing
 - **Referrer-Policy: strict-origin-when-cross-origin** - Control referrer information
 - **Permissions-Policy** - Disable camera, microphone, geolocation
 
-**Note:** `unsafe-inline` and `unsafe-eval` are necessary for Next.js functionality. In a future version, consider using nonces for stricter CSP.
+**Notes:**
+- `unsafe-inline` and `unsafe-eval` are necessary for Next.js functionality. In a future version, consider using nonces for stricter CSP.
+- `upgrade-insecure-requests` is NOT used because the app needs to connect to HTTP Emby servers (typically on local networks without SSL).
 
 ## Security Best Practices
 
