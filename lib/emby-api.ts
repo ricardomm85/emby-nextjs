@@ -155,5 +155,8 @@ export function getImageUrl(
   type: "Primary" | "Backdrop" = "Primary",
   maxWidth: number = 300
 ): string {
-  return `${host}/emby/Items/${itemId}/Images/${type}?maxWidth=${maxWidth}`;
+  const embyUrl = `${host}/emby/Items/${itemId}/Images/${type}?maxWidth=${maxWidth}`;
+
+  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  return `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
 }

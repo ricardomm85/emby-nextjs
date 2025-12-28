@@ -120,11 +120,12 @@ A previous implementation used `/api/download` as a proxy for downloads, which w
 
 **Hybrid approach: Proxy metadata, direct downloads**
 
-1. **Metadata operations use proxy** (`/api/emby-proxy`):
+1. **Metadata and images use proxy** (`/api/emby-proxy`):
    - Searches (~10-50 KB each)
    - Item details (~5-10 KB each)
    - Episode lists (~5-50 KB each)
-   - Total: ~100 KB per user session
+   - Images/posters (~50-200 KB each, cached)
+   - Total: ~500 KB - 1 MB per user session
    - ✅ Solves mixed content issues
    - ✅ Minimal bandwidth impact
 
@@ -145,7 +146,8 @@ A previous implementation used `/api/download` as a proxy for downloads, which w
 - Downloads remain direct (via `getDownloadUrl()`)
 
 **Bandwidth impact:**
-- Metadata: ~1-5 GB/month (thousands of users)
+- Metadata + Images: ~5-10 GB/month (thousands of users)
+- Images are cached with `max-age=31536000, immutable`
 - Downloads: 0 GB (direct to Emby)
 - Total Vercel usage: Well within 100 GB free tier
 

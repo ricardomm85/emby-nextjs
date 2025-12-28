@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Proxy genérico para peticiones GET a Emby
- * Solo para metadata (búsquedas, detalles, episodios)
+ * Para metadata (búsquedas, detalles, episodios) e imágenes
  * NO para descargas de video (para proteger bandwidth)
  */
 export async function GET(request: NextRequest) {
@@ -48,8 +48,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
+    const contentType = response.headers.get("content-type");
 
+    // Si es una imagen, devolver el contenido binario
+    if (contentType && contentType.startsWith("image/")) {
+      const imageBuffer = await response.arrayBuffer();
+
+      return new NextResponse(imageBuffer, {
+        status: 200,
+        headers: {
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+
+    // Si es JSON (metadata), devolver como JSON
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     if (error instanceof Error && error.name === "TimeoutError") {

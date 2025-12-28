@@ -56,8 +56,9 @@ GET  /emby/Videos/{itemId}/stream       # Download stream (DIRECT from browser)
 - Searches
 - Item details
 - Episode lists
+- Images (posters, backdrops)
 - **Reason:** Prevents mixed content warnings (HTTPS → HTTP)
-- **Bandwidth:** Minimal (~100 KB per user session)
+- **Bandwidth:** Minimal (~500 KB - 1 MB per user session, images cached)
 
 **Direct (no proxy):**
 - Video downloads
