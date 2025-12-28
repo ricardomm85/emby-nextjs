@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { rateLimit, getRequestIdentifier } from "@/lib/rate-limit";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const identifier = getRequestIdentifier(request);
 
   // Rate limiting por endpoint
