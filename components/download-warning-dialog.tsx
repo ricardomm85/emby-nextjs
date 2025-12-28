@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Copy, Download } from "lucide-react";
+import { AlertTriangle, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 interface DownloadWarningDialogProps {
@@ -69,29 +69,15 @@ export function DownloadWarningDialog({
             </a>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={copyFileName}
-              className="flex-1"
-            >
-              <Copy className="h-4 w-4 mr-2" />
-              Copiar nombre
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => {
-                window.open(downloadUrl, "_blank");
-                onOpenChange(false);
-              }}
-              className="flex-1"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Intentar descarga
-            </Button>
-          </div>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={copyFileName}
+            className="w-full"
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copiar nombre
+          </Button>
 
           <p className="text-xs text-muted-foreground text-center">
             Descargas bajo tu propia responsabilidad. Asegúrate de confiar en el

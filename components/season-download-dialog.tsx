@@ -101,25 +101,8 @@ export function SeasonDownloadDialog({
           </ScrollArea>
 
           <div className="border-t pt-3">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => {
-                // Abrir todos los enlaces en nuevas pestañas
-                episodes.forEach((episode, index) => {
-                  setTimeout(() => {
-                    window.open(episode.url, "_blank");
-                  }, index * 300);
-                });
-                onOpenChange(false);
-              }}
-              className="w-full"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Intentar descargar todos ({episodes.length})
-            </Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Recomendado: haz clic derecho en cada enlace de arriba
+            <p className="text-sm text-muted-foreground text-center">
+              Haz clic derecho en cada enlace de arriba y selecciona &quot;Guardar enlace como...&quot;
             </p>
           </div>
 
