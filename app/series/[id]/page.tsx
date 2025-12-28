@@ -27,6 +27,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { DownloadWarningDialog } from "@/components/download-warning-dialog";
+import { SeasonDownloadDialog } from "@/components/season-download-dialog";
 import { toast } from "sonner";
 
 export default function SeriesPage({
@@ -40,6 +42,11 @@ export default function SeriesPage({
   const [series, setSeries] = useState<MediaItem | null>(null);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
+  const [downloadFileName, setDownloadFileName] = useState("");
+  const [showSeasonDownloadDialog, setShowSeasonDownloadDialog] = useState(false);
+  const [seasonToDownload, setSeasonToDownload] = useState<Season | null>(null);
 
   useEffect(() => {
     if (!authLoading && !credentials) {
@@ -83,29 +90,18 @@ export default function SeriesPage({
   const downloadEpisode = (episode: Episode) => {
     if (!credentials || !series) return;
 
-    const downloadUrl = getDownloadUrl(credentials.host, episode.Id, credentials.token);
+    const url = getDownloadUrl(credentials.host, episode.Id, credentials.token);
+    const fileName = `${series.Name}_S${String(episode.ParentIndexNumber).padStart(2, "0")}E${String(episode.IndexNumber).padStart(2, "0")}_${episode.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_")}.${episode.Container || "mkv"}`;
 
-    // Crear elemento <a> temporal para forzar descarga
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = ""; // Esto sugiere al navegador que descargue
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    toast.success(`Descargando S${episode.ParentIndexNumber}E${episode.IndexNumber} (renombra si es necesario)`);
+    setDownloadUrl(url);
+    setDownloadFileName(fileName);
+    setShowDownloadDialog(true);
   };
 
   const downloadSeason = (season: Season) => {
     if (!credentials || !series) return;
-
-    toast.info(`Iniciando descarga de ${season.episodes.length} episodios...`);
-
-    season.episodes.forEach((episode, index) => {
-      setTimeout(() => {
-        downloadEpisode(episode);
-      }, index * 500);
-    });
+    setSeasonToDownload(season);
+    setShowSeasonDownloadDialog(true);
   };
 
   if (authLoading || !credentials) {
@@ -254,6 +250,30 @@ export default function SeriesPage({
             </AccordionItem>
           ))}
         </Accordion>
+
+        <DownloadWarningDialog
+          open={showDownloadDialog}
+          onOpenChange={setShowDownloadDialog}
+          downloadUrl={downloadUrl}
+          fileName={downloadFileName}
+        />
+
+        <SeasonDownloadDialog
+          open={showSeasonDownloadDialog}
+          onOpenChange={setShowSeasonDownloadDialog}
+          seasonNumber={seasonToDownload?.number || 0}
+          episodes={
+            seasonToDownload && credentials && series
+              ? seasonToDownload.episodes.map((episode) => ({
+                  id: episode.Id,
+                  url: getDownloadUrl(credentials.host, episode.Id, credentials.token),
+                  fileName: `${series.Name}_S${String(episode.ParentIndexNumber).padStart(2, "0")}E${String(episode.IndexNumber).padStart(2, "0")}_${episode.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_")}.${episode.Container || "mkv"}`,
+                  episodeNumber: episode.IndexNumber,
+                  episodeName: episode.Name,
+                }))
+              : []
+          }
+        />
       </div>
     </div>
   );

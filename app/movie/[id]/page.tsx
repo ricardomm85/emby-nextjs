@@ -9,6 +9,7 @@ import { MediaItem, formatDuration, formatSize } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DownloadWarningDialog } from "@/components/download-warning-dialog";
 import { toast } from "sonner";
 
 export default function MoviePage({
@@ -21,6 +22,9 @@ export default function MoviePage({
   const { credentials, isLoading: authLoading } = useAuth();
   const [movie, setMovie] = useState<MediaItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
+  const [downloadFileName, setDownloadFileName] = useState("");
 
   useEffect(() => {
     if (!authLoading && !credentials) {
@@ -54,17 +58,12 @@ export default function MoviePage({
   const handleDownload = () => {
     if (!credentials || !movie) return;
 
-    const downloadUrl = getDownloadUrl(credentials.host, movie.Id, credentials.token);
+    const url = getDownloadUrl(credentials.host, movie.Id, credentials.token);
+    const fileName = `${movie.Name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "_")}.${movie.Container || "mkv"}`;
 
-    // Crear elemento <a> temporal para forzar descarga
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = ""; // Esto sugiere al navegador que descargue
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    toast.success("Descarga iniciada (renombra el archivo si es necesario)");
+    setDownloadUrl(url);
+    setDownloadFileName(fileName);
+    setShowDownloadDialog(true);
   };
 
   if (authLoading || !credentials) {
@@ -178,6 +177,13 @@ export default function MoviePage({
             </Button>
           </div>
         </div>
+
+        <DownloadWarningDialog
+          open={showDownloadDialog}
+          onOpenChange={setShowDownloadDialog}
+          downloadUrl={downloadUrl}
+          fileName={downloadFileName}
+        />
       </div>
     </div>
   );
