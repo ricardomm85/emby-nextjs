@@ -287,7 +287,10 @@ function EpisodeRow({
   onDownload: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+    <div
+      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+      onClick={onDownload}
+    >
       <div className="flex-1 min-w-0 mr-4">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground shrink-0">
@@ -308,7 +311,10 @@ function EpisodeRow({
           )}
         </div>
       </div>
-      <Button variant="ghost" size="sm" onClick={onDownload}>
+      <Button variant="ghost" size="sm" onClick={(e) => {
+        e.stopPropagation();
+        onDownload();
+      }}>
         Descargar
       </Button>
     </div>

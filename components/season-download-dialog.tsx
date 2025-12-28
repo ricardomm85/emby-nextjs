@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Download, Copy } from "lucide-react";
+import { AlertTriangle, Copy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
@@ -82,18 +82,15 @@ export function SeasonDownloadDialog({
                         {episode.fileName}
                       </a>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => copyFileName(episode.fileName)}
-                        title="Copiar nombre del archivo"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Download className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={() => copyFileName(episode.fileName)}
+                      title="Copiar nombre del archivo"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
