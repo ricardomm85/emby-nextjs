@@ -1,0 +1,43 @@
+# Development files
+*.md
+!README.md
+CLAUDE.md
+SECURITY.md
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Testing
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+coverage/
+
+# Documentation
+docs/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (already in .gitignore but explicit here)
+.env*.local
+
+# Misc
+.prettierrc
+.prettierignore
+.eslintcache
