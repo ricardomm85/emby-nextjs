@@ -60,7 +60,6 @@ export default function MoviePage({
     const a = document.createElement("a");
     a.href = downloadUrl;
     a.download = ""; // Esto sugiere al navegador que descargue
-    a.target = "_blank";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
