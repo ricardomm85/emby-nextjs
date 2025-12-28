@@ -42,6 +42,7 @@ This document outlines the security measures implemented in this application.
 
 **Solution:**
 - **Login endpoint** (`/api/auth`): 1 attempt per minute per IP
+- **Emby proxy** (`/api/emby-proxy`): 30 requests per minute per IP
 - Returns HTTP 429 with retry-after headers
 - Implemented via middleware for better consistency
 
@@ -117,27 +118,42 @@ A previous implementation used `/api/download` as a proxy for downloads, which w
 
 ### The Solution
 
-**Downloads now happen DIRECTLY from browser to Emby server:**
+**Hybrid approach: Proxy metadata, direct downloads**
 
-1. **Zero Vercel bandwidth usage** for downloads
-2. **No proxy overhead** - faster downloads
-3. **No attack surface** for quota exhaustion
-4. **Simpler architecture** - fewer points of failure
+1. **Metadata operations use proxy** (`/api/emby-proxy`):
+   - Searches (~10-50 KB each)
+   - Item details (~5-10 KB each)
+   - Episode lists (~5-50 KB each)
+   - Total: ~100 KB per user session
+   - ✅ Solves mixed content issues
+   - ✅ Minimal bandwidth impact
 
-**Trade-off:**
-- Browser may show "mixed content" warnings (HTTPS site downloading from HTTP Emby)
-- Downloads still work, users just need to allow it
+2. **Downloads happen DIRECTLY** from browser to Emby:
+   - Movies: 2-5 GB each
+   - Series: 10-50 GB
+   - ✅ Zero Vercel bandwidth for downloads
+   - ✅ No quota exhaustion risk
+
+**Protection mechanisms:**
+- `/api/emby-proxy` blocks video stream endpoints
+- Rate limiting: 30 metadata requests/min per IP
+- Timeout: 10 seconds for metadata requests
 
 **Code Changes:**
-- Removed `/app/api/download/route.ts` entirely
-- Updated `app/movie/[id]/page.tsx` to download directly
-- Updated `app/series/[id]/page.tsx` to download directly
+- Added `/app/api/emby-proxy/route.ts` for metadata
+- Updated `lib/emby-api.ts` to use proxy for metadata
+- Downloads remain direct (via `getDownloadUrl()`)
+
+**Bandwidth impact:**
+- Metadata: ~1-5 GB/month (thousands of users)
+- Downloads: 0 GB (direct to Emby)
+- Total Vercel usage: Well within 100 GB free tier
 
 This architectural decision prioritizes:
 - ✅ Protection of free tier quota
-- ✅ Reliability and performance
-- ✅ Simpler security model
-- ⚠️ Slight UX degradation (mixed content warnings)
+- ✅ No mixed content warnings for browsing
+- ✅ Fast downloads (no proxy)
+- ✅ Secure metadata access
 
 ## Security Best Practices
 

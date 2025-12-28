@@ -79,9 +79,12 @@ export async function searchItems(
     params.set("IncludeItemTypes", type);
   }
 
-  const url = `${host}/emby/Users/${userId}/Items?${params.toString()}`;
+  const embyUrl = `${host}/emby/Users/${userId}/Items?${params.toString()}`;
 
-  const response = await fetch(url);
+  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
+
+  const response = await fetch(proxyUrl);
 
   if (!response.ok) {
     throw new Error("Error al buscar contenido");
@@ -97,9 +100,12 @@ export async function getItemDetails(
   token: string,
   itemId: string
 ): Promise<MediaItem> {
-  const url = `${host}/emby/Users/${userId}/Items/${itemId}?api_key=${token}`;
+  const embyUrl = `${host}/emby/Users/${userId}/Items/${itemId}?api_key=${token}`;
 
-  const response = await fetch(url);
+  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
+
+  const response = await fetch(proxyUrl);
 
   if (!response.ok) {
     throw new Error("Error al obtener detalles");
@@ -120,9 +126,12 @@ export async function getEpisodes(
     Fields: "MediaSources,Overview",
   });
 
-  const url = `${host}/emby/Shows/${seriesId}/Episodes?${params.toString()}`;
+  const embyUrl = `${host}/emby/Shows/${seriesId}/Episodes?${params.toString()}`;
 
-  const response = await fetch(url);
+  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
+
+  const response = await fetch(proxyUrl);
 
   if (!response.ok) {
     throw new Error("Error al obtener episodios");

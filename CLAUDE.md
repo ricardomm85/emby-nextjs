@@ -28,7 +28,8 @@ This is an Emby media server client built with Next.js 15 (App Router), Tailwind
 - `lib/security.ts` - Security utilities (SSRF prevention, input sanitization)
 - `lib/rate-limit.ts` - In-memory rate limiting
 - `components/auth-provider.tsx` - React Context for auth state, persists to localStorage
-- `app/api/auth/route.ts` - Proxy API route for authentication (prevents CORS/mixed content)
+- `app/api/auth/route.ts` - Proxy for authentication (prevents CORS/mixed content)
+- `app/api/emby-proxy/route.ts` - Proxy for metadata (searches, details, episodes)
 - `middleware.ts` - Rate limiting middleware for API routes
 
 ### Authentication State
@@ -42,13 +43,28 @@ Credentials stored in localStorage:
 
 ```
 POST /emby/Users/AuthenticateByName     # Login (via /api/auth proxy)
-GET  /emby/Users/{userId}/Items         # Search items (direct from browser)
-GET  /emby/Users/{userId}/Items/{id}    # Item details (direct from browser)
-GET  /emby/Shows/{seriesId}/Episodes    # Series episodes (direct from browser)
-GET  /emby/Videos/{itemId}/stream       # Download stream (direct from browser)
+GET  /emby/Users/{userId}/Items         # Search items (via /api/emby-proxy)
+GET  /emby/Users/{userId}/Items/{id}    # Item details (via /api/emby-proxy)
+GET  /emby/Shows/{seriesId}/Episodes    # Series episodes (via /api/emby-proxy)
+GET  /emby/Videos/{itemId}/stream       # Download stream (DIRECT from browser)
 ```
 
-**Important:** Only authentication uses the `/api/auth` proxy to avoid CORS and mixed content issues. All other requests (search, details, episodes, downloads) go directly from browser to Emby server to avoid consuming Vercel bandwidth quota.
+**Architecture - Hybrid Proxy Approach:**
+
+**Proxied (via `/api/emby-proxy`):**
+- Authentication
+- Searches
+- Item details
+- Episode lists
+- **Reason:** Prevents mixed content warnings (HTTPS → HTTP)
+- **Bandwidth:** Minimal (~100 KB per user session)
+
+**Direct (no proxy):**
+- Video downloads
+- **Reason:** Protect Vercel bandwidth quota (videos are 2-50 GB)
+- **Bandwidth:** 0 GB on Vercel
+
+This ensures good UX (no mixed content warnings) while protecting the free tier quota.
 
 ### UI Components
 
