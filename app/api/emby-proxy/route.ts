@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Proxy genérico para peticiones GET a Emby
- * Para metadata (búsquedas, detalles, episodios) e imágenes
- * NO para descargas de video (para proteger bandwidth)
+ * Generic proxy for GET requests to Emby
+ * For metadata (searches, details, episodes) and images
+ * NOT for video downloads (to protect bandwidth)
  */
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -14,15 +14,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Validar que la URL sea válida
+    // Validate URL is valid
     const urlObj = new URL(url);
 
-    // Validar protocolo
+    // Validate protocol
     if (!["http:", "https:"].includes(urlObj.protocol)) {
       return NextResponse.json({ error: "Invalid protocol" }, { status: 400 });
     }
 
-    // Bloquear endpoints de descarga/stream para prevenir abuso de bandwidth
+    // Block download/stream endpoints to prevent bandwidth abuse
     if (
       url.includes("/Videos/") &&
       (url.includes("/stream") || url.includes("/download"))
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       headers: {
         "User-Agent": "EmbyNextJS/1.0",
       },
-      // Timeout de 10 segundos
+      // 10 second timeout
       signal: AbortSignal.timeout(10000),
     });
 
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     const contentType = response.headers.get("content-type");
 
-    // Si es una imagen, devolver el contenido binario
+    // If it's an image, return binary content
     if (contentType && contentType.startsWith("image/")) {
       const imageBuffer = await response.arrayBuffer();
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Si es JSON (metadata), devolver como JSON
+    // If it's JSON (metadata), return as JSON
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {

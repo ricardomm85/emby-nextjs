@@ -26,7 +26,7 @@ export async function authenticate(
   password: string
 ): Promise<{ token: string; userId: string; userName: string }> {
   try {
-    // Usar proxy API para evitar problemas de CORS y mixed content (HTTP/HTTPS)
+    // Use proxy API to avoid CORS and mixed content (HTTP/HTTPS) issues
     const response = await fetch("/api/auth", {
       method: "POST",
       headers: {
@@ -81,7 +81,7 @@ export async function searchItems(
 
   const embyUrl = `${host}/emby/Users/${userId}/Items?${params.toString()}`;
 
-  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  // Use proxy to avoid mixed content (HTTPS -> HTTP)
   const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
 
   const response = await fetch(proxyUrl);
@@ -102,7 +102,7 @@ export async function getItemDetails(
 ): Promise<MediaItem> {
   const embyUrl = `${host}/emby/Users/${userId}/Items/${itemId}?api_key=${token}`;
 
-  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  // Use proxy to avoid mixed content (HTTPS -> HTTP)
   const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
 
   const response = await fetch(proxyUrl);
@@ -128,7 +128,7 @@ export async function getEpisodes(
 
   const embyUrl = `${host}/emby/Shows/${seriesId}/Episodes?${params.toString()}`;
 
-  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  // Use proxy to avoid mixed content (HTTPS -> HTTP)
   const proxyUrl = `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
 
   const response = await fetch(proxyUrl);
@@ -157,6 +157,6 @@ export function getImageUrl(
 ): string {
   const embyUrl = `${host}/emby/Items/${itemId}/Images/${type}?maxWidth=${maxWidth}`;
 
-  // Usar proxy para evitar mixed content (HTTPS -> HTTP)
+  // Use proxy to avoid mixed content (HTTPS -> HTTP)
   return `/api/emby-proxy?url=${encodeURIComponent(embyUrl)}`;
 }

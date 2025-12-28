@@ -1,11 +1,11 @@
 /**
- * Validación y sanitización de seguridad
+ * Security validation and sanitization
  */
 
-// Lista blanca de protocolos permitidos
+// Whitelist of allowed protocols
 const ALLOWED_PROTOCOLS = ["http:", "https:"];
 
-// Rangos de IPs privadas que no deberían ser accesibles
+// Private IP ranges that shouldn't be accessible
 const PRIVATE_IP_RANGES = [
   /^127\./, // localhost
   /^10\./, // private network
@@ -18,17 +18,17 @@ const PRIVATE_IP_RANGES = [
 ];
 
 /**
- * Valida que un host de Emby sea seguro
- * - Solo permite http/https
- * - Bloquea IPs privadas para prevenir SSRF
- * - Valida formato de URL
+ * Validate that an Emby host is safe
+ * - Only allows http/https
+ * - Blocks private IPs to prevent SSRF
+ * - Validates URL format
  */
 export function validateEmbyHost(host: string): { valid: boolean; error?: string } {
   if (!host || typeof host !== "string") {
     return { valid: false, error: "Host inválido" };
   }
 
-  // Validar longitud razonable
+  // Validate reasonable length
   if (host.length > 500) {
     return { valid: false, error: "Host demasiado largo" };
   }
@@ -36,17 +36,17 @@ export function validateEmbyHost(host: string): { valid: boolean; error?: string
   try {
     const url = new URL(host);
 
-    // Validar protocolo
+    // Validate protocol
     if (!ALLOWED_PROTOCOLS.includes(url.protocol)) {
       return { valid: false, error: "Protocolo no permitido. Use http o https" };
     }
 
-    // Validar que tenga hostname
+    // Validate has hostname
     if (!url.hostname) {
       return { valid: false, error: "Hostname inválido" };
     }
 
-    // Bloquear IPs privadas/localhost para prevenir SSRF
+    // Block private IPs/localhost to prevent SSRF
     const hostname = url.hostname.toLowerCase();
     for (const range of PRIVATE_IP_RANGES) {
       if (range.test(hostname)) {
@@ -54,7 +54,7 @@ export function validateEmbyHost(host: string): { valid: boolean; error?: string
       }
     }
 
-    // Bloquear localhost por nombre
+    // Block localhost by name
     if (hostname === "localhost" || hostname.endsWith(".localhost")) {
       return { valid: false, error: "No se permite localhost" };
     }
@@ -66,51 +66,51 @@ export function validateEmbyHost(host: string): { valid: boolean; error?: string
 }
 
 /**
- * Sanitiza un deviceId para prevenir header injection
- * - Elimina caracteres de control y saltos de línea
- * - Limita longitud
+ * Sanitize a deviceId to prevent header injection
+ * - Remove control characters and line breaks
+ * - Limit length
  */
 export function sanitizeDeviceId(deviceId: string): string {
   if (!deviceId || typeof deviceId !== "string") {
     return "unknown";
   }
 
-  // Eliminar caracteres de control, saltos de línea, etc.
+  // Remove control characters, line breaks, etc.
   let sanitized = deviceId.replace(/[\r\n\t\x00-\x1F\x7F]/g, "");
 
-  // Limitar longitud
+  // Limit length
   sanitized = sanitized.substring(0, 100);
 
-  // Solo permitir caracteres alfanuméricos, guiones y guiones bajos
+  // Only allow alphanumeric characters, hyphens and underscores
   sanitized = sanitized.replace(/[^a-zA-Z0-9\-_]/g, "");
 
   return sanitized || "unknown";
 }
 
 /**
- * Sanitiza un filename para prevenir header injection
- * - Elimina caracteres de control y saltos de línea
- * - Limita a nombre de archivo seguro
+ * Sanitize a filename to prevent header injection
+ * - Remove control characters and line breaks
+ * - Limit to safe filename
  */
 export function sanitizeFilename(filename: string): string {
   if (!filename || typeof filename !== "string") {
     return "download";
   }
 
-  // Eliminar caracteres de control, saltos de línea
+  // Remove control characters, line breaks
   let sanitized = filename.replace(/[\r\n\t\x00-\x1F\x7F]/g, "");
 
-  // Eliminar caracteres peligrosos para paths
+  // Remove dangerous characters for paths
   sanitized = sanitized.replace(/[\/\\:*?"<>|]/g, "");
 
-  // Limitar longitud
+  // Limit length
   sanitized = sanitized.substring(0, 255);
 
   return sanitized || "download";
 }
 
 /**
- * Valida que una URL de descarga pertenezca al host de Emby autorizado
+ * Validate that a download URL belongs to the authorized Emby host
  */
 export function validateDownloadUrl(
   downloadUrl: string,
@@ -128,12 +128,12 @@ export function validateDownloadUrl(
     const urlObj = new URL(downloadUrl);
     const hostObj = new URL(authorizedHost);
 
-    // Verificar que el hostname y puerto coincidan
+    // Verify hostname and port match
     if (urlObj.hostname !== hostObj.hostname || urlObj.port !== hostObj.port) {
       return { valid: false, error: "URL no autorizada - debe ser del servidor Emby configurado" };
     }
 
-    // Verificar protocolo
+    // Verify protocol
     if (!ALLOWED_PROTOCOLS.includes(urlObj.protocol)) {
       return { valid: false, error: "Protocolo no permitido" };
     }

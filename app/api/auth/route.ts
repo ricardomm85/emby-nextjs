@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateEmbyHost, sanitizeDeviceId } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
-  // Nota: Rate limiting se maneja en middleware.ts
+  // Note: Rate limiting is handled in proxy.ts
   try {
     const { host, username, password, deviceId } = await request.json();
 
-    // Validar inputs
+    // Validate inputs
     if (!host || !username || !password) {
       return NextResponse.json(
         { error: "Faltan parámetros requeridos" },
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar host para prevenir SSRF
+    // Validate host to prevent SSRF
     const hostValidation = validateEmbyHost(host);
     if (!hostValidation.valid) {
       return NextResponse.json(
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitizar deviceId para prevenir header injection
+    // Sanitize deviceId to prevent header injection
     const safeDeviceId = sanitizeDeviceId(deviceId);
 
     const url = `${host}/emby/Users/AuthenticateByName`;
@@ -41,12 +41,12 @@ export async function POST(request: NextRequest) {
         Pw: password,
         Password: password,
       }),
-      // Timeout de 10 segundos para prevenir hanging requests
+      // 10 second timeout to prevent hanging requests
       signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) {
-      // No exponer detalles internos del servidor
+      // Don't expose internal server details
       return NextResponse.json(
         { error: "Credenciales inválidas o servidor no disponible" },
         { status: response.status }
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       userName: data.User.Name,
     });
   } catch (error) {
-    // No exponer detalles del error
+    // Don't expose error details
     if (error instanceof Error && error.name === "TimeoutError") {
       return NextResponse.json(
         { error: "Timeout al conectar con el servidor" },

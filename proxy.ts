@@ -5,9 +5,9 @@ import { rateLimit, getRequestIdentifier } from "@/lib/rate-limit";
 export function proxy(request: NextRequest) {
   const identifier = getRequestIdentifier(request);
 
-  // Rate limiting por endpoint
+  // Rate limiting per endpoint
   if (request.nextUrl.pathname === "/api/auth") {
-    // Login: 1 intento por minuto
+    // Login: 1 attempt per minute
     const { allowed, remaining, resetTime } = rateLimit(identifier, 1, 60000);
 
     if (!allowed) {
@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
       );
     }
   } else if (request.nextUrl.pathname === "/api/emby-proxy") {
-    // Proxy de metadata: 30 requests por minuto
+    // Metadata proxy: 30 requests per minute
     const { allowed, remaining, resetTime } = rateLimit(
       `emby-proxy:${identifier}`,
       30,

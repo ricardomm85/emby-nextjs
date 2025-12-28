@@ -11,6 +11,15 @@ npm run lint     # Run ESLint
 npm start        # Start production server
 ```
 
+## Code Style
+
+**IMPORTANT:** All code and code comments MUST be written in English. Only user-facing interface text (UI labels, buttons, messages, toast notifications, etc.) should be in Spanish.
+
+Examples:
+- ✅ Code comments: `// Validate host to prevent SSRF`
+- ✅ UI text: `<Button>Descargar</Button>`, `toast.error("Error al cargar la serie")`
+- ❌ Code comments: `// Validar host para prevenir SSRF`
+
 ## Architecture
 
 This is an Emby media server client built with Next.js 15 (App Router), TailwindCSS 4, and shadcn/ui components. It allows users to search and download movies/series from an Emby server.
@@ -30,7 +39,7 @@ This is an Emby media server client built with Next.js 15 (App Router), Tailwind
 - `components/auth-provider.tsx` - React Context for auth state, persists to localStorage
 - `app/api/auth/route.ts` - Proxy for authentication (prevents CORS/mixed content)
 - `app/api/emby-proxy/route.ts` - Proxy for metadata (searches, details, episodes)
-- `middleware.ts` - Rate limiting middleware for API routes
+- `proxy.ts` - Rate limiting proxy for API routes (Next.js 16+)
 
 ### Authentication State
 
