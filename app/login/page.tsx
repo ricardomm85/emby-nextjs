@@ -47,22 +47,17 @@ export default function LoginPage() {
         host = host.slice(0, -1);
       }
 
-      console.log("[LOGIN] Host procesado:", host);
-      console.log("[LOGIN] Username:", formData.username);
-
       const result = await authenticate(
         host,
         formData.username,
         formData.password
       );
 
-      console.log("[LOGIN] Autenticación exitosa");
       localStorage.setItem(LAST_HOST_KEY, formData.host.trim());
       login(host, result.token, result.userId);
       toast.success(`Bienvenido, ${result.userName}`);
       router.push("/search");
     } catch (error) {
-      console.error("[LOGIN] Error:", error);
       const errorMessage = error instanceof Error ? error.message : "Error desconocido";
       toast.error(`Error: ${errorMessage}`);
     } finally {

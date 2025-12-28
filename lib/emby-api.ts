@@ -25,9 +25,6 @@ export async function authenticate(
   username: string,
   password: string
 ): Promise<{ token: string; userId: string; userName: string }> {
-  console.log("[EMBY AUTH] Intentando conectar a:", host);
-  console.log("[EMBY AUTH] Usuario:", username);
-
   try {
     // Usar proxy API para evitar problemas de CORS y mixed content (HTTP/HTTPS)
     const response = await fetch("/api/auth", {
@@ -43,16 +40,12 @@ export async function authenticate(
       }),
     });
 
-    console.log("[EMBY AUTH] Proxy response status:", response.status);
-
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("[EMBY AUTH] Error response:", errorData);
       throw new Error(errorData.error || `Error ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("[EMBY AUTH] Login exitoso para:", data.userName);
 
     return {
       token: data.token,
@@ -60,7 +53,6 @@ export async function authenticate(
       userName: data.userName,
     };
   } catch (error) {
-    console.error("[EMBY AUTH] Error en authenticate:", error);
     if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error("No se pudo conectar al servidor de autenticación");
     }
