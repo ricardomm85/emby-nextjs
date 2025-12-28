@@ -129,33 +129,37 @@ A previous implementation used `/api/download` as a proxy for downloads, which w
    - ✅ Solves mixed content issues
    - ✅ Minimal bandwidth impact
 
-2. **Downloads happen DIRECTLY** from browser to Emby:
+2. **Downloads happen DIRECTLY** from browser to Emby server:
    - Movies: 2-5 GB each
-   - Series: 10-50 GB
-   - ✅ Zero Vercel bandwidth for downloads
-   - ✅ No quota exhaustion risk
+   - Series episodes: 500 MB - 2 GB each
+   - ✅ **ZERO Vercel bandwidth** for downloads
+   - ⚠️ Browser may show mixed content warnings (user can allow)
+   - ⚠️ Filename may not be perfect (user can rename)
 
 **Protection mechanisms:**
-- `/api/emby-proxy` blocks video stream endpoints
+- `/api/emby-proxy` blocks video stream endpoints (metadata only)
 - Rate limiting: 30 metadata requests/min per IP
 - Timeout: 10 seconds for metadata requests
 
 **Code Changes:**
-- Added `/app/api/emby-proxy/route.ts` for metadata
+- Added `/app/api/emby-proxy/route.ts` for metadata and images
 - Updated `lib/emby-api.ts` to use proxy for metadata
-- Downloads remain direct (via `getDownloadUrl()`)
+- Downloads use direct links with `<a download>` attribute
 
 **Bandwidth impact:**
-- Metadata + Images: ~5-10 GB/month (thousands of users)
-- Images are cached with `max-age=31536000, immutable`
-- Downloads: 0 GB (direct to Emby)
-- Total Vercel usage: Well within 100 GB free tier
+
+Scenario: 1000 active users per month
+
+- Metadata + Images: ~5-10 GB/month
+- **Downloads: 0 GB** (direct to Emby) ✅
+
+Total: ~5-10 GB/month (< 10% of free tier) ✅
 
 This architectural decision prioritizes:
-- ✅ Protection of free tier quota
-- ✅ No mixed content warnings for browsing
-- ✅ Fast downloads (no proxy)
-- ✅ Secure metadata access
+- ✅ **ZERO bandwidth consumption** for downloads
+- ✅ No rate limiting needed for downloads
+- ✅ Simple architecture
+- ⚠️ User must allow mixed content and rename files manually
 
 ## Security Best Practices
 

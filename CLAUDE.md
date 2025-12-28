@@ -63,9 +63,10 @@ GET  /emby/Videos/{itemId}/stream       # Download stream (DIRECT from browser)
 **Direct (no proxy):**
 - Video downloads
 - **Reason:** Protect Vercel bandwidth quota (videos are 2-50 GB)
-- **Bandwidth:** 0 GB on Vercel
+- **Bandwidth:** 0 GB on Vercel ✅
+- **Trade-off:** User must allow mixed content warnings and may need to rename files
 
-This ensures good UX (no mixed content warnings) while protecting the free tier quota.
+This ensures zero bandwidth consumption while maintaining core functionality.
 
 ### UI Components
 

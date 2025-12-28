@@ -85,9 +85,16 @@ export default function SeriesPage({
 
     const downloadUrl = getDownloadUrl(credentials.host, episode.Id, credentials.token);
 
-    // Descargar directamente del servidor Emby (sin proxy)
-    window.open(downloadUrl, "_blank");
-    toast.success(`Descargando: S${episode.ParentIndexNumber}E${episode.IndexNumber}`);
+    // Crear elemento <a> temporal para forzar descarga
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = ""; // Esto sugiere al navegador que descargue
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    toast.success(`Descargando S${episode.ParentIndexNumber}E${episode.IndexNumber} (renombra si es necesario)`);
   };
 
   const downloadSeason = (season: Season) => {

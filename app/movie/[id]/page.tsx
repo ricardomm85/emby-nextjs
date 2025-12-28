@@ -56,9 +56,16 @@ export default function MoviePage({
 
     const downloadUrl = getDownloadUrl(credentials.host, movie.Id, credentials.token);
 
-    // Descargar directamente del servidor Emby (sin proxy)
-    window.open(downloadUrl, "_blank");
-    toast.success("Descarga iniciada");
+    // Crear elemento <a> temporal para forzar descarga
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = ""; // Esto sugiere al navegador que descargue
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    toast.success("Descarga iniciada (renombra el archivo si es necesario)");
   };
 
   if (authLoading || !credentials) {
