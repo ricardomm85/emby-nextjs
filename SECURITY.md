@@ -68,6 +68,32 @@ This document outlines the security measures implemented in this application.
 - No exposure of internal server responses or stack traces
 - Proper HTTP status codes without revealing implementation details
 
+### 6. Content Security Policy (CSP)
+
+**Problem:** XSS attacks could inject malicious scripts, clickjacking, and other injection attacks.
+
+**Solution:**
+Comprehensive security headers implemented in `next.config.ts`:
+
+- **CSP Headers**:
+  - `default-src 'self'` - Only load resources from same origin by default
+  - `script-src 'self' 'unsafe-inline' 'unsafe-eval'` - Required for Next.js hydration
+  - `style-src 'self' 'unsafe-inline'` - Required for Tailwind CSS
+  - `img-src 'self' data: https: http:` - Allow images from Emby servers
+  - `connect-src 'self' https: http:` - Allow API calls to Emby servers
+  - `frame-src 'none'` - No iframes allowed
+  - `object-src 'none'` - No plugins/objects
+  - `base-uri 'self'` - Prevent base tag injection
+  - `form-action 'self'` - Forms only submit to same origin
+  - `upgrade-insecure-requests` - Force HTTPS in production
+
+- **X-Frame-Options: DENY** - Prevent clickjacking
+- **X-Content-Type-Options: nosniff** - Prevent MIME sniffing
+- **Referrer-Policy: strict-origin-when-cross-origin** - Control referrer information
+- **Permissions-Policy** - Disable camera, microphone, geolocation
+
+**Note:** `unsafe-inline` and `unsafe-eval` are necessary for Next.js functionality. In a future version, consider using nonces for stricter CSP.
+
 ## Security Best Practices
 
 ### Current Implementation
@@ -80,6 +106,11 @@ This document outlines the security measures implemented in this application.
 ✅ No sensitive data in error messages
 ✅ HTTPS-only in production (Vercel default)
 ✅ XSS protection (Next.js default escaping)
+✅ CSP (Content Security Policy) headers
+✅ X-Frame-Options: DENY (clickjacking protection)
+✅ X-Content-Type-Options: nosniff
+✅ Referrer-Policy: strict-origin-when-cross-origin
+✅ Permissions-Policy (disable camera, microphone, geolocation)
 
 ### Recommendations for Production
 
@@ -92,13 +123,6 @@ This document outlines the security measures implemented in this application.
 ALLOWED_EMBY_HOSTS=emby1.example.com,emby2.example.com
 ```
 
-⚠️ **CSP Headers**: Add Content-Security-Policy headers to prevent XSS:
-```typescript
-// next.config.js
-headers: {
-  'Content-Security-Policy': "default-src 'self'; ..."
-}
-```
 
 ⚠️ **Authentication Token Security**:
 - Tokens stored in localStorage (XSS vulnerable)
